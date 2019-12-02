@@ -19,7 +19,39 @@ TextSimilar::TextSimilar(const char * dictPath)
 	, _max(20)
 {
 	//加载停用词
-	getStopWord(DICT_PATH + "/stop_words.utf8");
+	std::string path = DICT_PATH + "/stop_words.utf8";
+	if (GetStopWord(path.c_str()) == false)
+	{
+		cerr << "object init failed" << endl;
+		exit(-1);
+	}
+	path = DICT_PATH + "/idf.utf8";
+	if (GetIDF(path.c_str()) == false)
+	{
+		cerr << "object init failed" << endl;
+		exit(-1);
+	}
+}
+TextSimilar::TextSimilar(Config & config)
+	: _jieba(config._dictPath
+		, config._hmmModelPath
+		, config._userDictPath
+		, config._idfPath
+		, config._stopWordPath)
+	, _max(config._maxWordNum)
+{
+	//std::string path = DICT_PATH + "/stop_words.utf8";
+	if (GetStopWord(config._stopWordPath.c_str()) == false)
+	{
+		cerr << "object init failed" << endl;
+		exit(-1);
+	}
+	//path = DICT_PATH + "/idf.utf8";
+	if (GetIDF(config._idfPath.c_str()) == false)
+	{
+		cerr << "object init failed" << endl;
+		exit(-1);
+	}
 }
 void TextSimilar::PrintWordFreq(const WordFreq& wordFreq)
 {
@@ -36,13 +68,84 @@ void TextSimilar::PrintStopWord()
 	}
 	cout << endl;
 }
-void TextSimilar::getStopWord(const std::string & path)
+void TextSimilar::GetTextSimilar(const char * path1, const char * path2)
+{
+	TextSimilar::WordFreq wf, tfIdf;
+	if (GetWordFreq(path1, wf) == false)
+	{
+		exit(-1);
+	}
+	GetNomalFreq(wf);
+	GetTfIdf(wf, tfIdf);
+	
+	//排序
+	std::vector<TextSimilar::Pair> sorted, tfIdfSorted;
+	SortByFreq(wf, sorted);
+	/*cout << "tf: " << endl;
+	for (const auto& e : sorted)
+	{
+		cout << UTF8ToGBK(e.first) << ": " << e.second << " ";
+	}
+	cout << endl;*/
+	SortByFreq(tfIdf, tfIdfSorted);
+	/*cout << "tf-edf: " << endl;
+	for (const auto& e : tfIdfSorted)
+	{
+		cout << UTF8ToGBK(e.first) << ": " << e.second << " ";
+	}
+	cout << endl;*/
+	TextSimilar::WordFreq wf2, tfIdf2;
+	if (GetWordFreq(path2, wf2) == false)
+	{
+		exit(-1);
+	}
+	GetNomalFreq(wf2);
+	GetTfIdf(wf2, tfIdf2);
+	
+	//排序
+	std::vector<TextSimilar::Pair> sorted2, tfIdfSorted2;
+	SortByFreq(wf2, sorted2);
+	/*cout << "tf: " << endl;
+	for (const auto& e : sorted2)
+	{
+		cout << UTF8ToGBK(e.first) << ": " << e.second << " ";
+	}
+	cout << endl;*/
+	SortByFreq(tfIdf2, tfIdfSorted2);
+	/*cout << "tf-edf: " << endl;
+	for (const auto& e : tfIdfSorted2)
+	{
+		cout << UTF8ToGBK(e.first) << ": " << e.second << " ";
+	}
+	cout << endl;*/
+
+	//获取编码
+	TextSimilar::WordSet wordCode, wordTfIdfCode;
+	GetWordCode(sorted, wordCode);
+	GetWordCode(sorted2, wordCode);
+	GetWordCode(tfIdfSorted, wordTfIdfCode);
+	GetWordCode(tfIdfSorted2, wordTfIdfCode);
+	
+	//获取词频向量
+	std::vector<double> vec1, vec2;
+	std::vector<double> tfIdfVec1, tfIdfVec2;
+	GetVector(wordCode, wf, vec1);
+	GetVector(wordCode, wf2, vec2);
+	GetVector(wordTfIdfCode, tfIdf, tfIdfVec1);
+	GetVector(wordTfIdfCode, tfIdf2, tfIdfVec2);
+
+	//计算余弦相似度
+	cout << "tf: " << GetCos(vec1, vec2) << endl;
+	cout << "tf-idf: " << GetCos(tfIdfVec1, tfIdfVec2) << endl;
+	//return GetCos(vec1, vec2);
+}
+bool TextSimilar::GetStopWord(const char* path)
 {
 	std::ifstream file(path);
 	if (!file.is_open())
 	{
 		cerr << "stop word file open error" << endl;
-		return;
+		return false;
 	}
 	std::string temp;
 	while (!file.eof())
@@ -51,14 +154,32 @@ void TextSimilar::getStopWord(const std::string & path)
 		_stopWord.insert(temp);
 	}
 	file.close();
+	return true;
 }
-void TextSimilar::getWordFreq(const char * path, WordFreq & wordFreq)
+bool TextSimilar::GetIDF(const char * path)
 {
 	std::ifstream file(path);
 	if (!file.is_open())
 	{
-		cerr << "file open error" << endl;
-		return;
+		cerr << "open IDF file error" << endl;
+		return false;
+	}
+	std::pair<std::string, double> input;
+	while (!file.eof())
+	{
+		file >> input.first >> input.second;
+		_idf.insert(input);
+	}
+	//cout << "idf size:" << _idf.size() << endl;
+	return true;
+}
+bool TextSimilar::GetWordFreq(const char * path, WordFreq & wordFreq)
+{
+	std::ifstream file(path);
+	if (!file.is_open())
+	{
+		cerr << "path: [" << path << "] file open error" << endl;
+		return false;
 	}
 	std::string line;
 	std::vector<std::string> words;
@@ -81,6 +202,28 @@ void TextSimilar::getWordFreq(const char * path, WordFreq & wordFreq)
 		}
 	}
 	file.close();
+}
+
+void TextSimilar::GetNomalFreq(WordFreq & wordFreq)
+{
+	//int sz = wordFreq.size();
+	int sz = 0;
+	for (const auto& e : wordFreq)
+	{
+		sz += e.second;
+	}
+	for (auto& wf : wordFreq)
+	{
+		wf.second /= sz;
+	}
+}
+
+void TextSimilar::GetTfIdf(const WordFreq & normalWordFreq, WordFreq & tfIdf)
+{
+	for (const auto& e : normalWordFreq)
+	{
+		tfIdf.insert(std::make_pair(e.first, e.second * _idf[e.first]));
+	}
 }
 
 std::string TextSimilar::GBKToUTF8(const std::string & gbk)

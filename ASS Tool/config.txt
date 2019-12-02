@@ -1,0 +1,8 @@
+dict = D:\StudyFile\Project\ASS-Tool\cppjieba\dict\jieba.dict.utf8
+hmm = D:\StudyFile\Project\ASS-Tool\cppjieba\dict\hmm_model.utf8
+userDict = D:\StudyFile\Project\ASS-Tool\cppjieba\dict\user.dict.utf8
+idf = D:\StudyFile\Project\ASS-Tool\cppjieba\dict\idf.utf8
+stopWord = D:\StudyFile\Project\ASS-Tool\cppjieba\dict\stop_words.utf8
+maxWordNum = 40
+file1 = D:\StudyFile\Project\ASS-Tool\test.txt
+file2 = D:\StudyFile\Project\ASS-Tool\test2.txt

@@ -7,6 +7,7 @@
 #include <vector>
 #include <cppjieba/Jieba.hpp>
 #include <algorithm>
+#include "config.h"
 
 using std::cin;
 using std::cerr;
@@ -17,23 +18,40 @@ using std::endl;
 class TextSimilar
 {
 public:
-	typedef std::unordered_map<std::string, int> WordFreq;
+	typedef std::unordered_map<std::string, double> WordFreq;
 	typedef std::unordered_set<std::string> StopWord;
 	typedef std::unordered_set<std::string> WordSet;
-	typedef std::pair<std::string, int> Pair;
+	typedef std::pair<std::string, double> Pair;
 	
-	//获取文章相似度接口
+	//构造
 	TextSimilar(const char* dictPath);
+	TextSimilar(Config& config);
 
+	//获取文章相似度接口
+	void GetTextSimilar(const char* path1, const char* path2);
+private:
+	//调试用
+	//打印词频
 	void PrintWordFreq(const WordFreq& wordFreq);
-
+	
+	//打印停用词
 	void PrintStopWord();
-//private:
+
+
 	//获取停用词
-	void getStopWord(const std::string& path);
+	bool GetStopWord(const char* path);
+
+	//获取idf
+	bool GetIDF(const char* path);
 
 	//获取文章词频
-	void getWordFreq(const char* path, WordFreq& wordFreq);
+	bool GetWordFreq(const char* path, WordFreq& wordFreq);
+
+	//获取相对词频
+	void GetNomalFreq(WordFreq& wordFreq);
+
+	//获取tf-idf
+	void GetTfIdf(const WordFreq& normalWordFreq, WordFreq& tfIdf);
 
 	//GBK码转UTF8码
 	std::string GBKToUTF8(const std::string& gbk);
@@ -57,6 +75,7 @@ private:
 	cppjieba::Jieba _jieba;				//分词对象
 	StopWord _stopWord;					//停用词表
 	int _max;							//最大选取词频向量长度
+	WordFreq _idf;						//单词idf值
 };
 
 struct Compare

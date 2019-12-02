@@ -128,68 +128,72 @@
 //}
 #include "TextSimilar.h"
 
-void testWordFreq()
-{
-	TextSimilar textSimilar("../dict");
-	textSimilar.PrintStopWord();
-	TextSimilar::WordFreq wf;
-	textSimilar.getWordFreq("../../test.txt", wf);
-	//textSimilar.PrintWordFreq(wf);
-	//≈≈–Ú
-	std::vector<TextSimilar::Pair> sorted;
-	textSimilar.SortByFreq(wf, sorted);
-	cout << "-------------------------------------------------------" << endl;
-	for (const auto& e : sorted)
-	{
-		cout << textSimilar.UTF8ToGBK(e.first) << ": " << e.second << " ";
-	}
-	cout << endl;
-
-
-	TextSimilar::WordFreq wf2;
-	textSimilar.getWordFreq("../../test2.txt", wf2);
-	cout << "text2_______________________________________________________" << endl;
-	//textSimilar.PrintWordFreq(wf2);
-	//≈≈–Ú
-	std::vector<TextSimilar::Pair> sorted2;
-	textSimilar.SortByFreq(wf2, sorted2);
-	cout << "-------------------------------------------------------" << endl;
-	for (const auto& e : sorted2)
-	{
-		cout << textSimilar.UTF8ToGBK(e.first) << ": " << e.second << " ";
-	}
-	cout << endl;
-
-	//ªÒ»°±‡¬Î
-	TextSimilar::WordSet wordCode;
-	textSimilar.GetWordCode(sorted, wordCode);
-	textSimilar.GetWordCode(sorted2, wordCode);
-	cout << "±‡¬Î: " << endl;
-	for (const auto& e : wordCode)
-	{
-		cout << textSimilar.UTF8ToGBK(e) << " ";
-	}
-	cout << endl;
-
-	std::vector<double> vec1, vec2;
-	textSimilar.GetVector(wordCode, wf, vec1);
-	for (const auto& e : vec1)
-	{
-		cout << e << " ";
-	}
-	cout << endl;
-	textSimilar.GetVector(wordCode, wf2, vec2);
-	for (const auto& e : vec2)
-	{
-		cout << e << " ";
-	}
-	cout << endl;
-
-	cout << textSimilar.GetCos(vec1, vec2) << endl;
-}
-int main()
-{
-	testWordFreq();
-	system("pause");
-}
+//void testWordFreq()
+//{
+//	TextSimilar textSimilar("../dict");
+//	//textSimilar.PrintStopWord();
+//	TextSimilar::WordFreq wf;
+//	textSimilar.GetWordFreq("../../test.txt", wf);
+//	textSimilar.GetNomalFreq(wf);
+//	//textSimilar.PrintWordFreq(wf);
+//	//≈≈–Ú
+//	std::vector<TextSimilar::Pair> sorted;
+//	textSimilar.SortByFreq(wf, sorted);
+//	cout << "-------------------------------------------------------" << endl;
+//	for (const auto& e : sorted)
+//	{
+//		cout << textSimilar.UTF8ToGBK(e.first) << ": " << e.second << " ";
+//	}
+//	cout << endl;
+//
+//
+//	TextSimilar::WordFreq wf2;
+//	textSimilar.GetWordFreq("../../test2.txt", wf2);
+//	textSimilar.GetNomalFreq(wf2);
+//	cout << "text2_______________________________________________________" << endl;
+//	//textSimilar.PrintWordFreq(wf2);
+//	//≈≈–Ú
+//	std::vector<TextSimilar::Pair> sorted2;
+//	textSimilar.SortByFreq(wf2, sorted2);
+//	cout << "-------------------------------------------------------" << endl;
+//	for (const auto& e : sorted2)
+//	{
+//		cout << textSimilar.UTF8ToGBK(e.first) << ": " << e.second << " ";
+//	}
+//	cout << endl;
+//
+//	//ªÒ»°±‡¬Î
+//	TextSimilar::WordSet wordCode;
+//	textSimilar.GetWordCode(sorted, wordCode);
+//	textSimilar.GetWordCode(sorted2, wordCode);
+//	cout << "±‡¬Î: " << endl;
+//	for (const auto& e : wordCode)
+//	{
+//		cout << textSimilar.UTF8ToGBK(e) << " ";
+//	}
+//	cout << endl;
+//
+//	std::vector<double> vec1, vec2;
+//	textSimilar.GetVector(wordCode, wf, vec1);
+//	for (const auto& e : vec1)
+//	{
+//		cout << e << " ";
+//	}
+//	cout << endl;
+//	textSimilar.GetVector(wordCode, wf2, vec2);
+//	for (const auto& e : vec2)
+//	{
+//		cout << e << " ";
+//	}
+//	cout << endl;
+//
+//	cout << textSimilar.GetCos(vec1, vec2) << endl;
+//}
+//int main()
+//{
+//	//testWordFreq();
+//	TextSimilar textSimilar("../dict");
+//	cout << (textSimilar.GetTextSimilar("../../test.txt", "../../test2.txt")) << endl;
+//	system("pause");
+//}
 
